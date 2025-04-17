@@ -5,12 +5,12 @@
     <div class="form-container">
         <h2>Patient List</h2>
         {% if patients %}
-            <table>
+            <table class="patient-table">
                 <thead>
                     <tr>
                         <th>Patient ID</th>
                         <th>Name</th>
-                        <th>Phone</th>
+                        <th>Age</th>
                         <th>Blood Group</th>
                     </tr>
                 </thead>
@@ -19,7 +19,7 @@
                         <tr>
                             <td>{{ patient.patient_id }}</td>
                             <td>{{ patient.first_name }} {{ patient.last_name }}</td>
-                            <td>{{ patient.primary_phone }}</td>
+                            <td>{{ patient.age }}</td>
                             <td>{{ patient.blood_group }}</td>
                         </tr>
                     {% endfor %}

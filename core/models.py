@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from datetime import date
 
 class Patient(models.Model):
     # Basic Information
@@ -72,6 +73,11 @@ class Patient(models.Model):
         if not self.patient_id:
             self.patient_id = f'P{timezone.now().strftime("%Y%m%d")}{Patient.objects.count() + 1:04d}'
         super().save(*args, **kwargs)
+
+    @property
+    def age(self):
+        today = date.today()
+        return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
