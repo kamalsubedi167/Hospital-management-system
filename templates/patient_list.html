@@ -1,14 +1,33 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <h2>Patient List</h2>
-    {% if patients %}
-        <ul>
-        {% for patient in patients %}
-            <li>{{ patient.name }} (Age: {{ patient.age }})</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No patients found.</p>
-    {% endif %}
+    <div class="form-container">
+        <h2>Patient List</h2>
+        {% if patients %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Blood Group</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.patient_id }}</td>
+                            <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                            <td>{{ patient.primary_phone }}</td>
+                            <td>{{ patient.blood_group }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No patients found.</p>
+        {% endif %}
+        <a href="{% url 'add_patient' %}" class="btn btn-primary">Add New Patient</a>
+    </div>
 {% endblock %}

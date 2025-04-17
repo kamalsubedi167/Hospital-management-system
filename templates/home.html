@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <h2>Welcome to the Hospital Management System</h2>
-    <p>This is the home page of your HMS project.</p>
+    <div class="home-container">
+        <h2>Welcome to Hospital Management System</h2>
+        <p>Manage patient records efficiently and securely.</p>
+        {% if user.is_authenticated %}
+            <p>Hello, {{ user.username }}! <a href="{% url 'patient_list' %}" class="btn btn-primary">View Patients</a></p>
+        {% else %}
+            <p>Please <a href="{% url 'login' %}" class="btn btn-primary">login</a> to access patient records.</p>
+        {% endif %}
+    </div>
 {% endblock %}
