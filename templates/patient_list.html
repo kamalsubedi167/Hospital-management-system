@@ -4,6 +4,16 @@
 {% block content %}
     <div class="form-container">
         <h2>Patient List</h2>
+        <form method="get" class="search-form">
+            <div class="form-group">
+                <label for="search_query">Search by Name or Patient ID:</label>
+                <input type="text" name="q" id="search_query" value="{{ request.GET.q }}" placeholder="Enter name or ID">
+                <button type="submit" class="btn btn-primary btn-small">Search</button>
+                {% if request.GET.q %}
+                    <a href="{% url 'patient_list' %}" class="btn btn-secondary btn-small">Clear</a>
+                {% endif %}
+            </div>
+        </form>
         {% if patients %}
             <table class="patient-table">
                 <thead>

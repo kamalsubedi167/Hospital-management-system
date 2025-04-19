@@ -119,3 +119,14 @@ h2, h3 {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
 }
+.search-form {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.search-form input[type="text"] {
+    flex: 1;
+    max-width: 300px;
+}
