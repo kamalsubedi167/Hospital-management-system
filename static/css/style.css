@@ -115,10 +115,12 @@ h2, h3 {
 .patient-table tr:hover {
     background-color: #f1f1f1;
 }
+
 .btn-small {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
 }
+
 .search-form {
     margin-bottom: 1.5rem;
     display: flex;
@@ -129,4 +131,38 @@ h2, h3 {
 .search-form input[type="text"] {
     flex: 1;
     max-width: 300px;
+}
+
+.dashboard-stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex: 1;
+    min-width: 200px;
+}
+
+.stat-card h3 {
+    margin-top: 0;
+    color: #007bff;
+}
+
+.stat-card p, .stat-card ul {
+    margin: 0.5rem 0;
+}
+
+.stat-card ul {
+    list-style: none;
+    padding: 0;
+}
+.stat-card-warning {
+    background: #ffe6e6;
+    border-left: 4px solid #dc3545;
 }

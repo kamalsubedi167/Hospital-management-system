@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Hospital Dashboard</h2>
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Total Patients</h3>
+                <p>{{ total_patients }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Doctors</h3>
+                <p>{{ total_doctors }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Appointments</h3>
+                <p>{{ todays_appointments }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Lab Reports</h3>
+                <p>{{ pending_lab_reports }}</p>
+            </div>
+            <div class="stat-card {% if low_stock_medicines > 0 %}stat-card-warning{% endif %}">
+                <h3>Low Stock Medicines</h3>
+                <p>{{ low_stock_medicines }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Blood Group Distribution</h3>
+                {% if blood_group_counts %}
+                    <ul>
+                        {% for group in blood_group_counts %}
+                            <li>{{ group.blood_group }}: {{ group.count }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No data available.</p>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'patient_list' %}" class="btn btn-primary">View Patient List</a>
+    </div>
+{% endblock %}
