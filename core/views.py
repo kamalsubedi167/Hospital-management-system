@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Patient, Doctor, Appointment, Medicine, LabReport
-from .forms import PatientForm, DoctorForm, AppointmentForm
+from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import date
@@ -148,3 +148,38 @@ def delete_appointment(request, id):
         appointment.delete()
         return redirect('appointment_list')
     return render(request, 'appointment_list.html', {'appointments': Appointment.objects.all()})
+
+@login_required
+def medicine_list(request):
+    query = request.GET.get('q')
+    if query:
+        medicines = Medicine.objects.filter(
+            Q(name__icontains=query) |
+            Q(type__icontains=query)
+        )
+    else:
+        medicines = Medicine.objects.all()
+    return render(request, 'medicine_list.html', {'medicines': medicines})
+
+@login_required
+def add_medicine(request):
+    if request.method == 'POST':
+        form = MedicineForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('medicine_list')
+    else:
+        form = MedicineForm()
+    return render(request, 'add_medicine.html', {'form': form})
+
+@login_required
+def update_medicine_stock(request, id):
+    medicine = get_object_or_404(Medicine, id=id)
+    if request.method == 'POST':
+        form = MedicineForm(request.POST, instance=medicine)
+        if form.is_valid():
+            form.save()
+            return redirect('medicine_list')
+    else:
+        form = MedicineForm(instance=medicine)
+    return render(request, 'update_medicine_stock.html', {'form': form, 'medicine': medicine})

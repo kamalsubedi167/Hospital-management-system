@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Pharmacy Stock</h2>
+            <form method="get" class="search-form">
+                <input type="text" name="q" placeholder="Search by name or type..." value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            {% if medicines %}
+                <table class="medicine-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicine in medicines %}
+                            <tr>
+                                <td>{{ medicine.name }}</td>
+                                <td>{{ medicine.type }}</td>
+                                <td>{{ medicine.stock }}</td>
+                                <td>{{ medicine.price }}</td>
+                                <td>
+                                    <a href="{% url 'update_medicine_stock' medicine.id %}" class="btn btn-primary btn-small">Update Stock</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No medicines found.</p>
+            {% endif %}
+            <a href="{% url 'add_medicine' %}" class="btn btn-primary">Add New Medicine</a>
+        </div>
+    </div>
+{% endblock %}

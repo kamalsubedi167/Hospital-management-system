@@ -20,6 +20,7 @@
                     <a href="{% url 'patient_list' %}" class="sidebar-link">Patients</a>
                     <a href="{% url 'doctor_list' %}" class="sidebar-link">Doctors</a>
                     <a href="{% url 'appointment_list' %}" class="sidebar-link">Appointments</a>
+                    <a href="{% url 'medicine_list' %}" class="sidebar-link">Pharmacy</a>
                     <button onclick="document.getElementById('logout-form').submit()" class="sidebar-link sidebar-button">Logout</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
                         {% csrf_token %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor, Appointment
+from .models import Patient, Doctor, Appointment,Medicine
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -41,4 +41,12 @@ class AppointmentForm(forms.ModelForm):
             'appointment_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'patient': forms.Select(),
             'doctor': forms.Select(),
+        }
+class MedicineForm(forms.ModelForm):
+    class Meta:
+        model = Medicine
+        fields = ['name', 'type', 'stock', 'price']
+        widgets = {
+            'stock': forms.NumberInput(attrs={'min': 0}),
+            'price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
         }
