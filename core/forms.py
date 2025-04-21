@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient
+from .models import Patient, Doctor, Appointment
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -9,7 +9,7 @@ class PatientForm(forms.ModelForm):
             'marital_status', 'nationality', 'primary_phone', 'secondary_phone', 'email',
             'address_street', 'address_city', 'address_state', 'address_postal', 'address_country',
             'permanent_address_same', 'emergency_contact_name', 'emergency_contact_relationship',
-            'emergency_contact_phone', 'blood_group', 'allergies', 'chronic_conditions',
+            'emergency_contact_phone', 'blood_group', 'doctor', 'allergies', 'chronic_conditions',
             'current_medications', 'insurance_provider', 'insurance_policy_number',
             'billing_address_same', 'consent_for_treatment'
         ]
@@ -22,7 +22,23 @@ class PatientForm(forms.ModelForm):
             'allergies': forms.Textarea(attrs={'rows': 3}),
             'chronic_conditions': forms.Textarea(attrs={'rows': 3}),
             'current_medications': forms.Textarea(attrs={'rows': 3}),
-            'consent_for_treatment': forms.CheckboxInput(),
-            'permanent_address_same': forms.CheckboxInput(),
-            'billing_address_same': forms.CheckboxInput(),
+            'doctor': forms.Select(),
+        }
+
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = ['name', 'department', 'experience_years']
+        widgets = {
+            'experience_years': forms.NumberInput(attrs={'min': 0}),
+        }
+
+class AppointmentForm(forms.ModelForm):
+    class Meta:
+        model = Appointment
+        fields = ['patient', 'doctor', 'appointment_date']
+        widgets = {
+            'appointment_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'patient': forms.Select(),
+            'doctor': forms.Select(),
         }

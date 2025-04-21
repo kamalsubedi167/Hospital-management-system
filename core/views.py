@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Patient, Doctor, Appointment, Medicine, LabReport
-from .forms import PatientForm
+from .forms import PatientForm, DoctorForm, AppointmentForm
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import date
@@ -73,3 +73,78 @@ def dashboard(request):
         'blood_group_counts': blood_group_counts,
     }
     return render(request, 'dashboard.html', context)
+
+@login_required
+def doctor_list(request):
+    doctors = Doctor.objects.all()
+    return render(request, 'doctor_list.html', {'doctors': doctors})
+
+@login_required
+def add_doctor(request):
+    if request.method == 'POST':
+        form = DoctorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('doctor_list')
+    else:
+        form = DoctorForm()
+    return render(request, 'add_doctor.html', {'form': form})
+
+@login_required
+def doctor_profile(request, id):
+    doctor = get_object_or_404(Doctor, id=id)
+    assigned_patients = Patient.objects.filter(doctor=doctor)
+    context = {
+        'doctor': doctor,
+        'assigned_patients': assigned_patients,
+    }
+    return render(request, 'doctor_profile.html', context)
+
+@login_required
+def appointment_list(request):
+    filter_by = request.GET.get('filter_by', 'all')
+    appointments = Appointment.objects.filter(appointment_date__gte=timezone.now()).order_by('appointment_date')
+    if filter_by == 'patient' and request.GET.get('patient_id'):
+        appointments = appointments.filter(patient_id=request.GET.get('patient_id'))
+    elif filter_by == 'doctor' and request.GET.get('doctor_id'):
+        appointments = appointments.filter(doctor_id=request.GET.get('doctor_id'))
+    patients = Patient.objects.all()
+    doctors = Doctor.objects.all()
+    context = {
+        'appointments': appointments,
+        'patients': patients,
+        'doctors': doctors,
+        'filter_by': filter_by,
+    }
+    return render(request, 'appointment_list.html', context)
+
+@login_required
+def add_appointment(request):
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('appointment_list')
+    else:
+        form = AppointmentForm()
+    return render(request, 'add_appointment.html', {'form': form})
+
+@login_required
+def edit_appointment(request, id):
+    appointment = get_object_or_404(Appointment, id=id)
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('appointment_list')
+    else:
+        form = AppointmentForm(instance=appointment)
+    return render(request, 'edit_appointment.html', {'form': form, 'appointment': appointment})
+
+@login_required
+def delete_appointment(request, id):
+    appointment = get_object_or_404(Appointment, id=id)
+    if request.method == 'POST':
+        appointment.delete()
+        return redirect('appointment_list')
+    return render(request, 'appointment_list.html', {'appointments': Appointment.objects.all()})

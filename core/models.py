@@ -57,6 +57,7 @@ class Patient(models.Model):
     insurance_policy_number = models.CharField(max_length=50, blank=True)
     billing_address_same = models.BooleanField(default=True)
     consent_for_treatment = models.BooleanField(default=False)
+    doctor = models.ForeignKey('Doctor', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.patient_id:

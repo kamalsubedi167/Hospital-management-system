@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Reschedule Appointment</h2>
+            <form method="post" class="appointment-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.patient.id_for_label }}">Patient:</label>
+                    {{ form.patient }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.doctor.id_for_label }}">Doctor:</label>
+                    {{ form.doctor }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.appointment_date.id_for_label }}">Date and Time:</label>
+                    {{ form.appointment_date }}
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'appointment_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+

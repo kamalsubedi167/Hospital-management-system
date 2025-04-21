@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Doctor Profile: Dr. {{ doctor.name }}</h2>
+            <div class="doctor-details">
+                <p><strong>Doctor ID:</strong> {{ doctor.doctor_id }}</p>
+                <p><strong>Department:</strong> {{ doctor.department }}</p>
+                <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                <p><strong>Joined:</strong> {{ doctor.created_at|date:"F d, Y" }}</p>
+            </div>
+            <h3>Assigned Patients</h3>
+            {% if assigned_patients %}
+                <table class="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in assigned_patients %}
+                            <tr>
+                                <td>{{ patient.patient_id }}</td>
+                                <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                                <td>{{ patient.age }}</td>
+                                <td>{{ patient.gender }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No patients assigned to this doctor.</p>
+            {% endif %}
+            <a href="{% url 'doctor_list' %}" class="btn btn-primary">Back to Doctors</a>
+        </div>
+    </div>
+{% endblock %}
