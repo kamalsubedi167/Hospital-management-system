@@ -2,42 +2,90 @@
 {% load static %}
 
 {% block content %}
-    <div class="form-container">
-        <h2>Hospital Dashboard</h2>
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <h3>Total Patients</h3>
-                <p>{{ total_patients }}</p>
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Dashboard</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Total Patients</h3>
+                    <p>{{ total_patients }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Doctors</h3>
+                    <p>{{ total_doctors }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Today's Appointments</h3>
+                    <p>{{ todays_appointments }}</p>
+                </div>
+                <div class="stat-card stat-card-warning">
+                    <h3>Pending Lab Reports</h3>
+                    <p>{{ pending_lab_reports }}</p>
+                </div>
+                <div class="stat-card stat-card-warning">
+                    <h3>Low Stock Medicines</h3>
+                    <p>{{ low_stock_medicines }}</p>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>Total Doctors</h3>
-                <p>{{ total_doctors }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Today's Appointments</h3>
-                <p>{{ todays_appointments }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Pending Lab Reports</h3>
-                <p>{{ pending_lab_reports }}</p>
-            </div>
-            <div class="stat-card {% if low_stock_medicines > 0 %}stat-card-warning{% endif %}">
-                <h3>Low Stock Medicines</h3>
-                <p>{{ low_stock_medicines }}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Blood Group Distribution</h3>
-                {% if blood_group_counts %}
-                    <ul>
-                        {% for group in blood_group_counts %}
-                            <li>{{ group.blood_group }}: {{ group.count }}</li>
+            <h3>Upcoming Appointments</h3>
+            {% if upcoming_appointments %}
+                <table class="appointment-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in upcoming_appointments %}
+                            <tr>
+                                <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
+                                <td>{{ appointment.doctor.name }}</td>
+                                <td>{{ appointment.appointment_date|date:"F d, Y H:i" }}</td>
+                            </tr>
                         {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No data available.</p>
-                {% endif %}
-            </div>
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No upcoming appointments.</p>
+            {% endif %}
+            <h3>Patient Blood Group Distribution</h3>
+            <canvas id="bloodGroupChart" width="400" height="200"></canvas>
+            <script>
+                const ctx = document.getElementById('bloodGroupChart').getContext('2d');
+                const bloodGroupData = {
+                    labels: [{% for blood_group in blood_group_counts %}'{{ blood_group.blood_group }}',{% endfor %}],
+                    datasets: [{
+                        label: 'Number of Patients',
+                        data: [{% for blood_group in blood_group_counts %}{{ blood_group.count }},{% endfor %}],
+                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                };
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: bloodGroupData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Patients'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Blood Group'
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
         </div>
-        <a href="{% url 'patient_list' %}" class="btn btn-primary">View Patient List</a>
     </div>
 {% endblock %}

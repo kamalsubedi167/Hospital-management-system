@@ -61,6 +61,9 @@ def dashboard(request):
     todays_appointments = Appointment.objects.filter(
         appointment_date__date=today
     ).count()
+    upcoming_appointments = Appointment.objects.filter(
+        appointment_date__gte=timezone.now()
+    ).order_by('appointment_date')[:5]
     pending_lab_reports = LabReport.objects.filter(is_pending=True).count()
     low_stock_medicines = Medicine.objects.filter(stock__lt=10).count()
     blood_group_counts = Patient.objects.values('blood_group').annotate(count=Count('blood_group')).order_by('blood_group')
@@ -68,6 +71,7 @@ def dashboard(request):
         'total_patients': total_patients,
         'total_doctors': total_doctors,
         'todays_appointments': todays_appointments,
+        'upcoming_appointments': upcoming_appointments,
         'pending_lab_reports': pending_lab_reports,
         'low_stock_medicines': low_stock_medicines,
         'blood_group_counts': blood_group_counts,
