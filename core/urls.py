@@ -18,4 +18,7 @@ urlpatterns = [
     path('pharmacy/', views.medicine_list, name='medicine_list'),
     path('pharmacy/add/', views.add_medicine, name='add_medicine'),
     path('pharmacy/update/<int:id>/', views.update_medicine_stock, name='update_medicine_stock'),
+    path('lab-reports/', views.lab_report_list, name='lab_report_list'),
+    path('lab-reports/add/', views.add_lab_report, name='add_lab_report'),
+    path('lab-reports/update/<int:id>/', views.update_lab_report, name='update_lab_report'),
 ]

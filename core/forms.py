@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor, Appointment,Medicine
+from .models import Patient, Doctor, Appointment, Medicine, LabReport
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -42,6 +42,7 @@ class AppointmentForm(forms.ModelForm):
             'patient': forms.Select(),
             'doctor': forms.Select(),
         }
+
 class MedicineForm(forms.ModelForm):
     class Meta:
         model = Medicine
@@ -49,4 +50,14 @@ class MedicineForm(forms.ModelForm):
         widgets = {
             'stock': forms.NumberInput(attrs={'min': 0}),
             'price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+        }
+
+class LabReportForm(forms.ModelForm):
+    class Meta:
+        model = LabReport
+        fields = ['patient', 'test_name', 'result', 'is_pending']
+        widgets = {
+            'patient': forms.Select(),
+            'result': forms.Textarea(attrs={'rows': 3}),
+            'is_pending': forms.CheckboxInput(),
         }

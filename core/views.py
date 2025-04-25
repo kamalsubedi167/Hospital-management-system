@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Patient, Doctor, Appointment, Medicine, LabReport
-from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm
+from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm, LabReportForm
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import date
@@ -187,3 +187,39 @@ def update_medicine_stock(request, id):
     else:
         form = MedicineForm(instance=medicine)
     return render(request, 'update_medicine_stock.html', {'form': form, 'medicine': medicine})
+
+@login_required
+def lab_report_list(request):
+    show_pending = request.GET.get('show_pending', 'all')
+    if show_pending == 'pending':
+        lab_reports = LabReport.objects.filter(is_pending=True)
+    else:
+        lab_reports = LabReport.objects.all()
+    context = {
+        'lab_reports': lab_reports,
+        'show_pending': show_pending,
+    }
+    return render(request, 'lab_report_list.html', context)
+
+@login_required
+def add_lab_report(request):
+    if request.method == 'POST':
+        form = LabReportForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lab_report_list')
+    else:
+        form = LabReportForm()
+    return render(request, 'add_lab_report.html', {'form': form})
+
+@login_required
+def update_lab_report(request, id):
+    lab_report = get_object_or_404(LabReport, id=id)
+    if request.method == 'POST':
+        form = LabReportForm(request.POST, instance=lab_report)
+        if form.is_valid():
+            form.save()
+            return redirect('lab_report_list')
+    else:
+        form = LabReportForm(instance=lab_report)
+    return render(request, 'update_lab_report.html', {'form': form, 'lab_report': lab_report})

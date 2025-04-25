@@ -348,3 +348,36 @@ h2, h3 {
     padding: 1rem;
     border-radius: 8px;
 }
+/* Lab Report Table */
+.lab-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.lab-report-table th, .lab-report-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.lab-report-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.lab-report-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Lab Report Form */
+.lab-report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+}

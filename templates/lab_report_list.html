@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h2>Lab Reports</h2>
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label for="show_pending">Filter:</label>
+                    <select name="show_pending" id="show_pending">
+                        <option value="all" {% if show_pending == 'all' %}selected{% endif %}>All Reports</option>
+                        <option value="pending" {% if show_pending == 'pending' %}selected{% endif %}>Pending Only</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+            {% if lab_reports %}
+                <table class="lab-report-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Test Name</th>
+                            <th>Result</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in lab_reports %}
+                            <tr>
+                                <td>{{ report.patient.first_name }} {{ report.patient.last_name }}</td>
+                                <td>{{ report.test_name }}</td>
+                                <td>{{ report.result|truncatewords:10 }}</td>
+                                <td>{{ report.is_pending|yesno:"Pending,Completed" }}</td>
+                                <td>{{ report.created_at|date:"F d, Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'update_lab_report' report.id %}" class="btn btn-primary btn-small">Update</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No lab reports found.</p>
+            {% endif %}
+            <a href="{% url 'add_lab_report' %}" class="btn btn-primary">Add New Lab Report</a>
+        </div>
+    </div>
+{% endblock %}
