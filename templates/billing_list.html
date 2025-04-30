@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Billing List{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <h2 class="dashboard-title">Billing Records</h2>
+        <div class="dashboard-section">
+            <div class="section-content">
+                <a href="{% url 'add_billing' %}" class="action-button">Add New Bill</a>
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Amount</th>
+                            <th>Bill Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bill in bills %}
+                            <tr>
+                                <td>{{ bill.patient }}</td>
+                                <td>${{ bill.amount }}</td>
+                                <td>{{ bill.bill_date }}</td>
+                                <td>{{ bill.is_paid|yesno:"Paid,Unpaid" }}</td>
+                                <td>
+                                    <a href="{% url 'update_billing' bill.id %}" class="action-link">Edit</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">No bills found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

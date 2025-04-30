@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <h2 class="dashboard-title">Dashboard Overview</h2>
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/patient-icon.png' %}" alt="Patients Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Total Patients</h3>
+                    <p>{{ total_patients }}</p>
+                </div>
+            </div>
+            <div class="stat-card">s
+                <div class="stat-icon">
+                    <img src="{% static 'images/doctor-icon.png' %}" alt="Doctors Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Total Doctors</h3>
+                    <p>{{ total_doctors }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/appointment-icon.png' %}" alt="Appointments Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Today's Appointments</h3>
+                    <p>{{ todays_appointments }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/lab-report-icon.png' %}" alt="Lab Reports Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Pending Lab Reports</h3>
+                    <p>{{ pending_lab_reports }}</p>
+                </div>
+            </div>
+            {% if user.groups.all.0.name == 'Admin' %}
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/medicine-icon.png' %}" alt="Medicines Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Low Stock Medicines</h3>
+                    <p>{{ low_stock_medicines }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/billing-icon.png' %}" alt="Billing Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Unpaid Bills</h3>
+                    <p>{{ unpaid_bills }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-section">
+            <h3 class="section-title">Upcoming Appointments</h3>
+            <div class="section-content">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in upcoming_appointments %}
+                            <tr>
+                                <td>{{ appointment.patient }}</td>
+                                <td>{{ appointment.doctor }}</td>
+                                <td>{{ appointment.appointment_date }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3">No upcoming appointments.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+    </div>
+{% endblock %}
+

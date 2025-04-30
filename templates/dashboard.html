@@ -1,91 +1,225 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
     <div class="content-wrapper">
-        <div class="form-container">
-            <h2>Dashboard</h2>
-            <div class="dashboard-stats">
-                <div class="stat-card">
+        <h2 class="dashboard-title">Dashboard Overview</h2>
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/patient-icon.png' %}" alt="Patients Icon">
+                </div>
+                <div class="stat-info">
                     <h3>Total Patients</h3>
                     <p>{{ total_patients }}</p>
                 </div>
-                <div class="stat-card">
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/doctor-icon.png' %}" alt="Doctors Icon">
+                </div>
+                <div class="stat-info">
                     <h3>Total Doctors</h3>
                     <p>{{ total_doctors }}</p>
                 </div>
-                <div class="stat-card">
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/appointment-icon.png' %}" alt="Appointments Icon">
+                </div>
+                <div class="stat-info">
                     <h3>Today's Appointments</h3>
                     <p>{{ todays_appointments }}</p>
                 </div>
-                <div class="stat-card stat-card-warning">
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/lab-report-icon.png' %}" alt="Lab Reports Icon">
+                </div>
+                <div class="stat-info">
                     <h3>Pending Lab Reports</h3>
                     <p>{{ pending_lab_reports }}</p>
                 </div>
-                <div class="stat-card stat-card-warning">
+            </div>
+            {% if user.groups.all.0.name == 'Admin' %}
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/medicine-icon.png' %}" alt="Medicines Icon">
+                </div>
+                <div class="stat-info">
                     <h3>Low Stock Medicines</h3>
                     <p>{{ low_stock_medicines }}</p>
                 </div>
             </div>
-            <h3>Upcoming Appointments</h3>
-            {% if upcoming_appointments %}
-                <table class="appointment-table">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <img src="{% static 'images/billing-icon.png' %}" alt="Billing Icon">
+                </div>
+                <div class="stat-info">
+                    <h3>Unpaid Bills</h3>
+                    <p>{{ unpaid_bills }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-section">
+            <h3 class="section-title">Patient Registration Trend (Last 6 Months)</h3>
+            <div class="section-content">
+                <canvas id="registrationChart"></canvas>
+                <div id="noRegistrationData" style="display: none;">
+                    <p>No registration data available.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h3 class="section-title">Common Diseases (Top 5)</h3>
+            <div class="section-content">
+                <canvas id="diseasesChart"></canvas>
+                <div id="noDiseasesData" style="display: none;">
+                    <p>No disease data available.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h3 class="section-title">Upcoming Appointments</h3>
+            <div class="section-content">
+                <table class="dashboard-table">
                     <thead>
                         <tr>
                             <th>Patient</th>
                             <th>Doctor</th>
-                            <th>Date & Time</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for appointment in upcoming_appointments %}
                             <tr>
-                                <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
-                                <td>{{ appointment.doctor.name }}</td>
-                                <td>{{ appointment.appointment_date|date:"F d, Y H:i" }}</td>
+                                <td>{{ appointment.patient }}</td>
+                                <td>{{ appointment.doctor }}</td>
+                                <td>{{ appointment.appointment_date }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3">No upcoming appointments.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            {% else %}
-                <p>No upcoming appointments.</p>
-            {% endif %}
-            <h3>Patient Blood Group Distribution</h3>
-            <canvas id="bloodGroupChart" width="400" height="200"></canvas>
-            <script>
-                const ctx = document.getElementById('bloodGroupChart').getContext('2d');
-                const bloodGroupData = {
-                    labels: [{% for blood_group in blood_group_counts %}'{{ blood_group.blood_group }}',{% endfor %}],
-                    datasets: [{
-                        label: 'Number of Patients',
-                        data: [{% for blood_group in blood_group_counts %}{{ blood_group.count }},{% endfor %}],
-                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                        borderColor: 'rgba(0, 123, 255, 1)',
-                        borderWidth: 1
-                    }]
-                };
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: bloodGroupData,
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Patients'
-                                }
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            // Define variables with fallback values
+            const registrationMonths = {{ registration_months | safe }} || [];
+            const registrationCounts = {{ registration_counts | safe }} || [];
+            const diseaseLabels = {{ disease_labels | safe }} || [];
+            const diseaseCounts = {{ disease_counts | safe }} || [];
+
+            // Debug the values
+            console.log('registrationMonths:', registrationMonths);
+            console.log('registrationCounts:', registrationCounts);
+            console.log('diseaseLabels:', diseaseLabels);
+            console.log('diseaseCounts:', diseaseCounts);
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Patient Registration Trend Chart
+                const registrationCtx = document.getElementById('registrationChart');
+                const noRegistrationMessage = document.getElementById('noRegistrationData');
+                if (registrationCtx) {
+                    if (Array.isArray(registrationCounts) && registrationCounts.length > 0 && registrationCounts.some(count => count > 0)) {
+                        const registrationChart = new Chart(registrationCtx.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: registrationMonths,
+                                datasets: [{
+                                    label: 'Patients Registered',
+                                    data: registrationCounts,
+                                    borderColor: 'rgba(46, 204, 113, 1)',
+                                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                    fill: true,
+                                    tension: 0.3
+                                }]
                             },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Blood Group'
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            font: {
+                                                size: 14
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        });
+                    } else {
+                        registrationCtx.style.display = 'none';
+                        noRegistrationMessage.style.display = 'block';
                     }
-                });
-            </script>
-        </div>
+                } else {
+                    console.error('registrationChart canvas not found');
+                }
+
+                // Common Diseases Chart
+                const diseasesCtx = document.getElementById('diseasesChart');
+                const noDiseasesMessage = document.getElementById('noDiseasesData');
+                if (diseasesCtx) {
+                    if (Array.isArray(diseaseLabels) && diseaseLabels.length > 0 && Array.isArray(diseaseCounts) && diseaseCounts.length > 0) {
+                        const diseasesChart = new Chart(diseasesCtx.getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: diseaseLabels,
+                                datasets: [{
+                                    label: 'Number of Patients',
+                                    data: diseaseCounts,
+                                    backgroundColor: 'rgba(231, 76, 60, 0.5)',
+                                    borderColor: 'rgba(231, 76, 60, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        labels: {
+                                            font: {
+                                                size: 14
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        diseasesCtx.style.display = 'none';
+                        noDiseasesMessage.style.display = 'block';
+                    }
+                } else {
+                    console.error('diseasesChart canvas not found');
+                }
+            });
+        </script>
     </div>
 {% endblock %}

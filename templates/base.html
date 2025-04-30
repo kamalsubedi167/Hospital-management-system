@@ -19,9 +19,14 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}" class="sidebar-link">Dashboard</a>
                     <a href="{% url 'patient_list' %}" class="sidebar-link">Patients</a>
-                    <a href="{% url 'doctor_list' %}" class="sidebar-link">Doctors</a>
+                    {% if user.groups.all.0.name == 'Admin' %}
+                        <a href="{% url 'doctor_list' %}" class="sidebar-link">Doctors</a>
+                    {% endif %}
                     <a href="{% url 'appointment_list' %}" class="sidebar-link">Appointments</a>
-                    <a href="{% url 'medicine_list' %}" class="sidebar-link">Pharmacy</a>
+                    {% if user.groups.all.0.name == 'Admin' %}
+                        <a href="{% url 'medicine_list' %}" class="sidebar-link">Pharmacy</a>
+                        <a href="{% url 'billing_list' %}" class="sidebar-link">Billing</a>
+                    {% endif %}
                     <a href="{% url 'lab_report_list' %}" class="sidebar-link">Lab Reports</a>
                     <button onclick="document.getElementById('logout-form').submit()" class="sidebar-link sidebar-button">Logout</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
@@ -32,7 +37,7 @@
                 {% endif %}
             </nav>
             <div class="sidebar-footer">
-                <p>Admin User</p>
+                <p>{{ user.groups.all.0.name|default:"Guest" }} User</p>
             </div>
         </aside>
         <main class="main-content">

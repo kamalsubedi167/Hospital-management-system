@@ -21,4 +21,7 @@ urlpatterns = [
     path('lab-reports/', views.lab_report_list, name='lab_report_list'),
     path('lab-reports/add/', views.add_lab_report, name='add_lab_report'),
     path('lab-reports/update/<int:id>/', views.update_lab_report, name='update_lab_report'),
+    path('billing/', views.billing_list, name='billing_list'),
+    path('billing/add/', views.add_billing, name='add_billing'),
+    path('billing/update/<int:id>/', views.update_billing, name='update_billing'),
 ]

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor, Appointment, Medicine, LabReport
+from .models import Patient, Doctor, Appointment, Medicine, LabReport,Billing
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -60,4 +60,12 @@ class LabReportForm(forms.ModelForm):
             'patient': forms.Select(),
             'result': forms.Textarea(attrs={'rows': 3}),
             'is_pending': forms.CheckboxInput(),
+        }
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = Billing
+        fields = ['patient', 'amount', 'bill_date', 'is_paid', 'description']
+        widgets = {
+            'bill_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
         }

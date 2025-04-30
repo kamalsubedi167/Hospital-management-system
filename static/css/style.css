@@ -381,3 +381,21 @@ h2, h3 {
     padding: 1rem;
     border-radius: 8px;
 }
+.stat-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto; /* centers the icon horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.stat-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding: 10px;
+}

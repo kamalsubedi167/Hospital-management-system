@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Billing{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <h2 class="dashboard-title">Update Bill for {{ bill.patient }}</h2>
+        <div class="dashboard-section">
+            <div class="section-content">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="action-button">Update</button>
+                    <a href="{% url 'billing_list' %}" class="action-link">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
