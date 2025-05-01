@@ -24,4 +24,5 @@ urlpatterns = [
     path('billing/', views.billing_list, name='billing_list'),
     path('billing/add/', views.add_billing, name='add_billing'),
     path('billing/update/<int:id>/', views.update_billing, name='update_billing'),
+    path('profile/', views.profile, name='profile'),
 ]

@@ -28,6 +28,7 @@
                         <a href="{% url 'billing_list' %}" class="sidebar-link">Billing</a>
                     {% endif %}
                     <a href="{% url 'lab_report_list' %}" class="sidebar-link">Lab Reports</a>
+                    <a href="{% url 'profile' %}" class="sidebar-link">Profile</a>
                     <button onclick="document.getElementById('logout-form').submit()" class="sidebar-link sidebar-button">Logout</button>
                     <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
                         {% csrf_token %}

@@ -6,6 +6,20 @@
 {% block content %}
     <div class="content-wrapper">
         <h2 class="dashboard-title">Dashboard Overview</h2>
+     
+        {% if notifications %}
+            <div class="dashboard-section">
+                <h3 class="section-title">Notifications</h3>
+                <div class="section-content">
+                    <ul class="notification-list">
+                        {% for notification in notifications %}
+                            <li>{{ notification.message }} ({{ notification.created_at }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+        
         <div class="dashboard-stats">
             <div class="stat-card">
                 <div class="stat-icon">

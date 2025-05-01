@@ -14,6 +14,18 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     ]
+         # choices.py or inside your models.py
+    BLOOD_GROUP_CHOICES = [
+        ('A+', 'A+'),
+        ('A-', 'A-'),
+        ('B+', 'B+'),
+        ('B-', 'B-'),
+        ('AB+', 'AB+'),
+        ('AB-', 'AB-'),
+        ('O+', 'O+'),
+        ('O-', 'O-'),
+]
+
     RELATIONSHIP_CHOICES = [
         ('SPOUSE', 'Spouse'),
         ('PARENT', 'Parent'),
@@ -21,7 +33,7 @@ class Patient(models.Model):
         ('SIBLING', 'Sibling'),
         ('OTHER', 'Other'),
     ]
-    patient_id = models.CharField(max_length=20, unique=True)
+    patient_id = models.CharField(max_length=20, unique=True,editable=False)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     date_of_birth = models.DateField()
@@ -43,23 +55,33 @@ class Patient(models.Model):
     emergency_contact_name = models.CharField(max_length=100)
     emergency_contact_relationship = models.CharField(max_length=20, choices=RELATIONSHIP_CHOICES)
     emergency_contact_phone = models.CharField(max_length=15)
-    blood_group = models.CharField(max_length=5, blank=True, null=True)
+    blood_group = models.CharField(
+        max_length=3,
+        choices=BLOOD_GROUP_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Select a valid blood group"
+    )
     consent_for_treatment = models.BooleanField(default=False)
     doctor = models.ForeignKey('Doctor', on_delete=models.SET_NULL, null=True, blank=True)
 #done for check
     created_at = models.DateTimeField(default=timezone.now) #testcheck
-    insurance_policy_number = models.CharField(max_length=100)
-    insurance_provider = models.CharField(max_length=100)
-    current_medications = models.TextField()
-    allergies = models.TextField()
-    middle_name = models.CharField(max_length=100)
-    secondary_phone = models.CharField(max_length=15)
+    allergies = models.TextField(blank=True, default='None')
+    chronic_conditions = models.TextField(blank=True, default='None')
+    current_medications = models.TextField(blank=True, default='None')
+    insurance_provider = models.CharField(max_length=100, blank=True, default='Self-Pay')
+    insurance_policy_number = models.CharField(max_length=50, blank=True)
+    middle_name = models.CharField(max_length=100,blank=True)
+    secondary_phone = models.CharField(max_length=15,blank=True)
     billing_address_same = models.BooleanField(default=False)
-    chronic_conditions = models.TextField()
+ 
     email = models.EmailField()
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.patient_id})"
-
+    def save(self, *args, **kwargs):
+        if not self.patient_id:
+           self.patient_id = f'P{timezone.now().strftime("%Y%m%d")}{Patient.objects.count() + 1:04d}'
+        super().save(*args, **kwargs)
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100)
@@ -89,7 +111,7 @@ class Medicine(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=20, choices=MEDICINE_TYPE_CHOICES)
     stock = models.IntegerField()
-    expiry_date = models.DateField()
+
     price = models.DecimalField(max_digits=10, decimal_places=2)#test
     def __str__(self):
         return f"{self.name} ({self.type})"
@@ -121,3 +143,11 @@ class Diagnosis(models.Model):
 
     def __str__(self):
         return f"Diagnosis of {self.disease} for {self.patient}"
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message}"
