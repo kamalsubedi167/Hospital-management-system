@@ -25,4 +25,6 @@ urlpatterns = [
     path('billing/add/', views.add_billing, name='add_billing'),
     path('billing/update/<int:id>/', views.update_billing, name='update_billing'),
     path('profile/', views.profile, name='profile'),
+    path('patient/<int:id>/', views.patient_profile, name='patient_profile'),
+    path('notification/<int:id>/mark_read/', views.mark_notification_read, name='mark_notification_read'),
 ]

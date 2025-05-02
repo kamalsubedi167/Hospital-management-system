@@ -6,7 +6,13 @@
 {% block content %}
     <div class="content-wrapper">
         <h2 class="dashboard-title">Dashboard Overview</h2>
-     
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
         {% if notifications %}
             <div class="dashboard-section">
                 <h3 class="section-title">Notifications</h3>
@@ -14,6 +20,7 @@
                     <ul class="notification-list">
                         {% for notification in notifications %}
                             <li>{{ notification.message }} ({{ notification.created_at }})</li>
+                            <a href="{% url 'mark_notification_read' notification.id %}" class="btn btn-info btn-sm">Mark as Read</a>
                         {% endfor %}
                     </ul>
                 </div>
