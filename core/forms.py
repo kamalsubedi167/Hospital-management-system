@@ -1,5 +1,7 @@
 from django import forms
-from .models import Patient, Doctor, Appointment, Medicine, LabReport,Billing
+from django.utils import timezone
+from datetime import date
+from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -25,6 +27,30 @@ class PatientForm(forms.ModelForm):
             'doctor': forms.Select(),
         }
 
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data['date_of_birth']
+        if dob > date.today():
+            raise forms.ValidationError("Date of birth cannot be in the future.")
+        return dob
+
+    def clean_primary_phone(self):
+        phone = self.cleaned_data['primary_phone']
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError("Primary phone must be exactly 10 digits.")
+        return phone
+
+    def clean_secondary_phone(self):
+        phone = self.cleaned_data.get('secondary_phone')
+        if phone and (not phone.isdigit() or len(phone) != 10):
+            raise forms.ValidationError("Secondary phone must be exactly 10 digits.")
+        return phone
+
+    def clean_emergency_contact_phone(self):
+        phone = self.cleaned_data['emergency_contact_phone']
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError("Emergency contact phone must be exactly 10 digits.")
+        return phone
+
 class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
@@ -43,6 +69,12 @@ class AppointmentForm(forms.ModelForm):
             'doctor': forms.Select(),
         }
 
+    def clean_appointment_date(self):
+        appointment_date = self.cleaned_data['appointment_date']
+        if appointment_date < timezone.now():
+            raise forms.ValidationError("Appointment date cannot be in the past.")
+        return appointment_date
+
 class MedicineForm(forms.ModelForm):
     class Meta:
         model = Medicine
@@ -51,6 +83,18 @@ class MedicineForm(forms.ModelForm):
             'stock': forms.NumberInput(attrs={'min': 0}),
             'price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
         }
+
+    def clean_stock(self):
+        stock = self.cleaned_data['stock']
+        if stock < 0:
+            raise forms.ValidationError("Stock cannot be negative.")
+        return stock
+
+    def clean_price(self):
+        price = self.cleaned_data['price']
+        if price < 0:
+            raise forms.ValidationError("Price cannot be negative.")
+        return price
 
 class LabReportForm(forms.ModelForm):
     class Meta:
@@ -61,6 +105,7 @@ class LabReportForm(forms.ModelForm):
             'result': forms.Textarea(attrs={'rows': 3}),
             'is_pending': forms.CheckboxInput(),
         }
+
 class BillingForm(forms.ModelForm):
     class Meta:
         model = Billing
@@ -69,3 +114,15 @@ class BillingForm(forms.ModelForm):
             'bill_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+        if amount <= 0:
+            raise forms.ValidationError("Amount must be greater than zero.")
+        return amount
+
+    def clean_bill_date(self):
+        bill_date = self.cleaned_data['bill_date']
+        if bill_date > timezone.now().date():
+            raise forms.ValidationError("Bill date cannot be in the future.")
+        return bill_date

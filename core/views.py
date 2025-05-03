@@ -6,11 +6,15 @@ from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import date, timedelta, datetime
 import json
+import csv
+from django.http import HttpResponse
 from django.db.models.functions import TruncMonth
 from django.db import IntegrityError
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, login, authenticate
+from django_ratelimit.decorators import ratelimit
+
 
 def is_admin(user):
     return user.groups.filter(name='Admin').exists()
@@ -23,6 +27,19 @@ def is_admin_or_doctor(user):
 
 def home(request):
     return render(request, 'home.html')
+
+@ratelimit(key='ip', rate='5/m')
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Invalid username or password.")
+    return render(request, 'login.html')
 
 @login_required
 @user_passes_test(is_admin_or_doctor)
@@ -72,6 +89,60 @@ def patient_list(request):
         return render(request, 'patient_list.html', context)
 
     return render(request, 'patient_list.html', {'patients': patients})
+    pass
+
+@login_required
+@user_passes_test(is_admin)
+def export_patients_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="patients.csv"'
+    
+    writer = csv.writer(response)
+    
+    # Header row
+    writer.writerow([
+        'Patient ID', 'First Name', 'Middle Name', 'Last Name',
+        'Gender', 'Date of Birth', 'Primary Phone', 'Secondary Phone',
+        'Email', 'Blood Group', 'Nationality',
+        'Full Address', 'Permanent Address', 'Emergency Contact Name',
+        'Emergency Contact Relationship', 'Emergency Contact Phone',
+        'Insurance Provider', 'Insurance Policy Number',
+        'Chronic Conditions', 'Allergies', 'Current Medications',
+        'Doctor Assigned', 'Consent for Treatment', 'Created At'
+    ])
+    
+    patients = Patient.objects.select_related('doctor').all()
+    
+    for p in patients:
+        full_address = f"{p.address_street}, {p.address_city}, {p.address_state}, {p.address_postal}, {p.address_country}"
+        permanent_address = f"{p.permanent_street}, {p.permanent_city}, {p.permanent_state}, {p.permanent_postal}, {p.permanent_country}" if not p.permanent_address_same else full_address
+        
+        writer.writerow([
+            p.patient_id, p.first_name, p.middle_name, p.last_name,
+            p.gender, p.date_of_birth, p.primary_phone, p.secondary_phone,
+            p.email, p.blood_group, p.nationality,
+            full_address, permanent_address, p.emergency_contact_name,
+            p.emergency_contact_relationship, p.emergency_contact_phone,
+            p.insurance_provider, p.insurance_policy_number,
+            p.chronic_conditions, p.allergies, p.current_medications,
+            str(p.doctor) if p.doctor else 'N/A',
+            'Yes' if p.consent_for_treatment else 'No',
+            p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+    
+    return response
+
+@login_required
+@user_passes_test(is_admin)
+def export_appointments_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="appointments.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Patient', 'Doctor', 'Appointment Date', 'Notes'])
+    appointments = Appointment.objects.all().values_list('patient__first_name', 'doctor__user__first_name', 'appointment_date')
+    for appointment in appointments:
+        writer.writerow(appointment)
+    return response
 
 @login_required
 @user_passes_test(is_admin)

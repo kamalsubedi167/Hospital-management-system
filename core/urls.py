@@ -27,4 +27,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('patient/<int:id>/', views.patient_profile, name='patient_profile'),
     path('notification/<int:id>/mark_read/', views.mark_notification_read, name='mark_notification_read'),
+    path('appointments/export/', views.export_appointments_csv, name='export_appointments_csv'),
+    path('patients/export/', views.export_patients_csv, name='export_patients_csv'),
 ]
+
