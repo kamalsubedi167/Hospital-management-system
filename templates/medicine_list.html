@@ -22,15 +22,15 @@
                     </thead>
                     <tbody>
                         {% for medicine in medicines %}
-                            <tr>
-                                <td>{{ medicine.name }}</td>
-                                <td>{{ medicine.type }}</td>
-                                <td>{{ medicine.stock }}</td>
-                                <td>{{ medicine.price }}</td>
-                                <td>
-                                    <a href="{% url 'update_medicine_stock' medicine.id %}" class="btn btn-primary btn-small">Update Stock</a>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td data-label="Name">{{ medicine.name }}</td>
+                            <td data-label="Type">{{ medicine.type }}</td>
+                            <td data-label="Stock">{{ medicine.stock }}</td>
+                            <td data-label="Price">{{ medicine.price }}</td>
+                            <td data-label="Actions">
+                                <a href="{% url 'update_medicine_stock' medicine.id %}" class="btn btn-primary btn-small">Update Stock</a>
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>

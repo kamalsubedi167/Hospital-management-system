@@ -5,7 +5,7 @@
     <div class="content-wrapper">
         <div class="form-container">
             <h2>Add New Lab Report</h2>
-            <form method="post" class="lab-report-form">
+            <form method="post" class="lab-report-form" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="{{ form.patient.id_for_label }}">Patient:</label>
@@ -23,9 +23,15 @@
                     <label for="{{ form.is_pending.id_for_label }}">Pending:</label>
                     {{ form.is_pending }}
                 </div>
+                <div class="form-group">
+                    <label for="{{ form.file.id_for_label }}">Upload File:</label>
+                    {{ form.file }} <!-- Add the file input field here -->
+                </div>
                 <button type="submit" class="btn btn-primary">Add Lab Report</button>
                 <a href="{% url 'lab_report_list' %}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>
 {% endblock %}
+
+

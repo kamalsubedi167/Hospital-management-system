@@ -4,12 +4,16 @@
 
 {% block content %}
     <div class="content-wrapper">
-        <h2 class="table-title">Patient List</h2>
-        {% if user.groups.all.0.name == 'Admin' %}
-        <div>
-            <a href="{% url 'add_patient' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Patient</a>
-            <a href="{% url 'export_patients_csv' %}" class="btn btn-success"><i class="fas fa-download"></i> Export to CSV</a>
+        <div class="top-links">
+            <h2 class="table-title">Patient List</h2>
+            {% if user.groups.all.0.name == 'Admin' %}
+            <div>
+                <a href="{% url 'add_patient' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Patient</a>
+                <a href="{% url 'export_patients_csv' %}" class="btn btn-success"><i class="fas fa-download"></i> Export to CSV</a>
+            </div>
+
         </div>
+       
             <div class="filter-form">
                 
                 <form method="get">

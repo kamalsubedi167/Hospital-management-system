@@ -99,12 +99,30 @@ class MedicineForm(forms.ModelForm):
 class LabReportForm(forms.ModelForm):
     class Meta:
         model = LabReport
-        fields = ['patient', 'test_name', 'result', 'is_pending']
+        fields = ['patient', 'test_name', 'result', 'is_pending','file']
         widgets = {
             'patient': forms.Select(),
             'result': forms.Textarea(attrs={'rows': 3}),
             'is_pending': forms.CheckboxInput(),
+            'file': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf,video/*'}),
         }
+
+    def clean_date(self):
+        report_date = self.cleaned_data['date']
+        if report_date > timezone.now():
+            raise forms.ValidationError("Report date cannot be in the future.")
+        return report_date
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'mp4', 'avi', 'mov']
+            extension = file.name.split('.')[-1].lower()
+            if extension not in allowed_extensions:
+                raise forms.ValidationError("File type not supported. Allowed types: images, PDFs, videos.")
+            if file.size > 10 * 1024 * 1024:  # 10 MB limit
+                raise forms.ValidationError("File size must be under 10 MB.")
+        return file
 
 class BillingForm(forms.ModelForm):
     class Meta:

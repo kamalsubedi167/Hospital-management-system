@@ -36,6 +36,7 @@
                     <th>Test Name</th>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>File</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -46,6 +47,13 @@
                         <td>{{ lab_report.test_name }}</td>
                         <td>{{ lab_report.date }}</td>
                         <td>{{ lab_report.get_status_display }}</td>
+                        <td>
+                            {% if lab_report.file %}
+                                <a href="{{ lab_report.file.url }}" target="_blank">View File</a>
+                            {% else %}
+                                No File
+                            {% endif %}
+                        </td>
                         <td>
                             {% if user.groups.all.0.name == 'Admin' %}
                                 <a href="{% url 'update_lab_report' lab_report.id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>

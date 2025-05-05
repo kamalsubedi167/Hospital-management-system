@@ -117,11 +117,17 @@ class Medicine(models.Model):
         return f"{self.name} ({self.type})"
 
 class LabReport(models.Model):
+    STATUS_CHOICES = [
+        (True, 'Pending'),
+        (False, 'Completed'),
+    ]
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_name = models.CharField(max_length=100)
     result = models.TextField()
     date = models.DateField(default=timezone.now)
-    is_pending = models.BooleanField(default=True)
+    is_pending = models.BooleanField(choices=STATUS_CHOICES, default=True)
+    file = models.FileField(upload_to='lab_reports/', blank=True, null=True)
+
 
     def __str__(self):
         return f"Lab Report for {self.patient} - {self.test_name}"
@@ -132,6 +138,7 @@ class Billing(models.Model):
     bill_date = models.DateField(default=timezone.now)
     is_paid = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
+   
 
     def __str__(self):
         return f"Bill for {self.patient} - ${self.amount} ({'Paid' if self.is_paid else 'Unpaid'})"

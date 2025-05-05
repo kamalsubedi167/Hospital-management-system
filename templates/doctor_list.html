@@ -3,8 +3,12 @@
 
 {% block content %}
     <div class="content-wrapper">
-        <div class="form-container">
-            <h2>Doctor Profiles</h2>
+        <div class="form-container ">
+    
+            <div class="form-header">
+                <h2>Doctor Profiles</h2>
+                <a href="{% url 'add_doctor' %}" class="btn btn-primary">Add New Doctor</a>
+            </div>
             {% if doctors %}
                 <table class="doctor-table">
                     <thead>
@@ -33,7 +37,7 @@
             {% else %}
                 <p>No doctors found.</p>
             {% endif %}
-            <a href="{% url 'add_doctor' %}" class="btn btn-primary">Add New Doctor</a>
+        
         </div>
     </div>
 {% endblock %}
