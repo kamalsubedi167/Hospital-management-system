@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing, Diagnosis, Notification
-from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm, LabReportForm, BillingForm
+from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing, Diagnosis, Notification,Feedback
+from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm, LabReportForm, BillingForm, FeedbackForm
 from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import date, timedelta, datetime
@@ -544,7 +544,7 @@ def lab_report_list(request):
 @user_passes_test(is_admin)
 def add_lab_report(request):
     if request.method == 'POST':
-        form = LabReportForm(request.POST)
+        form = LabReportForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
             return redirect('lab_report_list')
@@ -557,7 +557,7 @@ def add_lab_report(request):
 def update_lab_report(request, id):
     lab_report = get_object_or_404(LabReport, id=id)
     if request.method == 'POST':
-        form = LabReportForm(request.POST, instance=lab_report)
+        form = LabReportForm(request.POST,request.FILES, instance=lab_report)
         if form.is_valid():
             form.save()
             return redirect('lab_report_list')
@@ -662,3 +662,40 @@ def mark_notification_read(request, id):
     print(f"After update: Notification {notification.id}, is_read = {notification.is_read}")
     messages.success(request, "Notification marked as read.")
     return redirect('dashboard')
+    
+@login_required
+@user_passes_test(is_admin_or_doctor)
+def feedback_list(request):
+    if request.user.groups.filter(name='Admin').exists():
+        feedbacks = Feedback.objects.all().order_by('-created_at')
+    else:
+        feedbacks = Feedback.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'feedback_list.html', {'feedbacks': feedbacks})
+
+@login_required
+@user_passes_test(is_admin_or_doctor)
+def submit_feedback(request):
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.save()
+            messages.success(request, "Feedback submitted successfully.")
+            return redirect('feedback_list')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = FeedbackForm()
+    return render(request, 'submit_feedback.html', {'form': form})
+
+@login_required
+@user_passes_test(is_admin)
+def resolve_feedback(request, id):
+    feedback = get_object_or_404(Feedback, id=id)
+    if request.method == 'POST':
+        feedback.is_resolved = True
+        feedback.save()
+        messages.success(request, "Feedback marked as resolved.")
+        return redirect('feedback_list')
+    return render(request, 'feedback_list.html', {'feedbacks': Feedback.objects.all()})

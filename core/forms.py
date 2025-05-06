@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 from datetime import date
-from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing
+from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing,Feedback
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -144,3 +144,34 @@ class BillingForm(forms.ModelForm):
         if bill_date > timezone.now().date():
             raise forms.ValidationError("Bill date cannot be in the future.")
         return bill_date
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Enter your feedback or report an issue...'}),
+        }
+
+# testchckmultiplefileupload 
+
+# class LabReportFileForm(forms.ModelForm):
+#     class Meta:
+#         model = LabReportFile
+#         fields = ['file']
+#         widgets = {
+#             'file': forms.ClearableFileInput(attrs={
+#                 'multiple': True,
+#                 'accept': 'image/*,application/pdf,video/*'
+#             })
+#         }
+
+#     def clean_file(self):
+#         files = self.files.getlist('file')
+#         for file in files:
+#             ext = file.name.split('.')[-1].lower()
+#             if ext not in ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'mp4', 'avi', 'mov']:
+#                 raise forms.ValidationError("Unsupported file type.")
+#             if file.size > 10 * 1024 * 1024:
+#                 raise forms.ValidationError("File size must be under 10MB.")
+#         return files

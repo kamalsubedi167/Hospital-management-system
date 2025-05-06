@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback List{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <h2 class="table-title">Feedback List</h2>
+        {% if user.groups.all.0.name == 'Admin' %}
+            <a href="{% url 'submit_feedback' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Submit Feedback</a>
+        {% endif %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    {% if user.groups.all.0.name == 'Admin' %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for feedback in feedbacks %}
+                    <tr>
+                        <td>{{ feedback.user.username|escape }}</td>
+                        <td>{{ feedback.message|escape }}</td>
+                        <td>{{ feedback.created_at|escape }}</td>
+                        <td>
+                            {% if feedback.is_resolved %}
+                                Resolved
+                            {% else %}
+                                Unresolved
+                            {% endif %}
+                        </td>
+                        {% if user.groups.all.0.name == 'Admin' %}
+                            <td>
+                                {% if not feedback.is_resolved %}
+                                    <form action="{% url 'resolve_feedback' feedback.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Resolve</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if user.groups.all.0.name == 'Admin' %}5{% else %}4{% endif %}">No feedback available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

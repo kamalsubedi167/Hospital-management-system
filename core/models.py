@@ -158,3 +158,19 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
+
+# testchckmultiplefileupload 
+# from django.db import models
+
+# class LabReportFile(models.Model):
+#     lab_report = models.ForeignKey('LabReport', on_delete=models.CASCADE, related_name='files')
+#     file = models.FileField(upload_to='lab_reports/')
+#     uploaded_at = models.DateTimeField(auto_now_add=True)
+class Feedback(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Feedback from {self.user.username} on {self.created_at}"
