@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing, Diagnosis, Notification,Feedback
+from .models import Patient, Doctor, Appointment, Medicine, LabReport, Billing, Diagnosis, Notification,Feedback,AuditLog
 from .forms import PatientForm, DoctorForm, AppointmentForm, MedicineForm, LabReportForm, BillingForm, FeedbackForm
 from django.db.models import Q, Count
 from django.utils import timezone
@@ -14,6 +14,10 @@ from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, login, authenticate
 from django_ratelimit.decorators import ratelimit
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
+
 
 
 def is_admin(user):
@@ -28,6 +32,9 @@ def is_admin_or_doctor(user):
 def home(request):
     return render(request, 'home.html')
 
+def log_action(user, action, description):
+    AuditLog.objects.create(user=user, action=action, description=description)
+
 @ratelimit(key='ip', rate='5/m')
 def login_view(request):
     if request.method == 'POST':
@@ -36,6 +43,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            log_action(user, "Login", f"User {user.username} logged in.")
             return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password.")
@@ -128,7 +136,9 @@ def export_patients_csv(request):
             str(p.doctor) if p.doctor else 'N/A',
             'Yes' if p.consent_for_treatment else 'No',
             p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+
         ])
+    log_action(request.user, "Export Patients CSV", "Exported patient list to CSV")
     
     return response
 
@@ -138,10 +148,11 @@ def export_appointments_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="appointments.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Patient', 'Doctor', 'Appointment Date', 'Notes'])
+    writer.writerow(['Patient', 'Doctor', 'Appointment Date'])
     appointments = Appointment.objects.all().values_list('patient__first_name', 'doctor__user__first_name', 'appointment_date')
     for appointment in appointments:
         writer.writerow(appointment)
+    log_action(request.user, "Export Appointments CSV", "Exported appointment list to CSV")
     return response
 
 @login_required
@@ -152,6 +163,7 @@ def add_patient(request):
         if form.is_valid():
             try:
                 form.save()
+                log_action(request.user, "Add Patient", f"Added patient {patient.first_name} {patient.last_name} (ID: {patient.patient_id})")
                 messages.success(request, "Patient added successfully.")
                 return redirect('patient_list')
             except IntegrityError:
@@ -171,6 +183,7 @@ def edit_patient(request, id):
         if form.is_valid():
             try:
                 form.save()
+                log_action(request.user, "Edit Patient", f"Edited patient {patient.first_name} {patient.last_name} (ID: {patient.patient_id})")
                 messages.success(request, "Patient updated successfully.")
                 return redirect('patient_list')
             except IntegrityError:
@@ -187,6 +200,7 @@ def delete_patient(request, id):
     patient = get_object_or_404(Patient, id=id)
     if request.method == 'POST':
         patient.delete()
+        log_action(request.user, "Delete Patient", f"Deleted patient {patient_name}")
         messages.success(request, "Patient deleted successfully.")
         return redirect('patient_list')
     return render(request, 'patient_list.html', {'patients': Patient.objects.all()})
@@ -427,7 +441,11 @@ def add_appointment(request):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             form.save()
+            log_action(request.user, "Add Appointment", f"Added appointment for patient {appointment.patient} with doctor {appointment.doctor}")
+            messages.success(request, "Appointment added successfully.")#testchcek
             return redirect('appointment_list')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = AppointmentForm()
     return render(request, 'add_appointment.html', {'form': form})
@@ -440,7 +458,11 @@ def edit_appointment(request, id):
         form = AppointmentForm(request.POST, instance=appointment)
         if form.is_valid():
             form.save()
+            log_action(request.user, "Edit Appointment", f"Edited appointment for patient {appointment.patient} with doctor {appointment.doctor}")
+            messages.success(request, "Appointment updated successfully.")#testcheck
             return redirect('appointment_list')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = AppointmentForm(instance=appointment)
     return render(request, 'edit_appointment.html', {'form': form, 'appointment': appointment})
@@ -450,7 +472,10 @@ def edit_appointment(request, id):
 def delete_appointment(request, id):
     appointment = get_object_or_404(Appointment, id=id)
     if request.method == 'POST':
+        appointment_info = f"patient {appointment.patient} with doctor {appointment.doctor} on {appointment.appointment_date}"#testcheck
         appointment.delete()
+        log_action(request.user, "Delete Appointment", f"Deleted appointment for {appointment_info}")
+        messages.success(request, "Appointment deleted successfully.")
         return redirect('appointment_list')
     return render(request, 'appointment_list.html', {'appointments': Appointment.objects.all()})
 
@@ -547,6 +572,7 @@ def add_lab_report(request):
         form = LabReportForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
+            log_action(request.user, "Add Lab Report", f"Added lab report {lab_report.test_name} for patient {lab_report.patient}")
             return redirect('lab_report_list')
     else:
         form = LabReportForm()
@@ -560,7 +586,11 @@ def update_lab_report(request, id):
         form = LabReportForm(request.POST,request.FILES, instance=lab_report)
         if form.is_valid():
             form.save()
+            log_action(request.user, "Update Lab Report", f"Updated lab report {lab_report.test_name} for patient {lab_report.patient}")
+            messages.success(request, "Lab report updated successfully.")
             return redirect('lab_report_list')
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = LabReportForm(instance=lab_report)
     return render(request, 'update_lab_report.html', {'form': form, 'lab_report': lab_report})
@@ -644,6 +674,7 @@ def patient_profile(request, id):
     appointments = Appointment.objects.filter(patient=patient).order_by('-appointment_date')
     diagnoses = Diagnosis.objects.filter(patient=patient).order_by('-diagnosis_date')
     lab_reports = LabReport.objects.filter(patient=patient).order_by('-date')
+    log_action(request.user, "View Patient Profile", f"Viewed profile of patient {patient.first_name} {patient.last_name} (ID: {patient.patient_id})")
 
     context = {
         'patient': patient,
@@ -681,6 +712,7 @@ def submit_feedback(request):
             feedback = form.save(commit=False)
             feedback.user = request.user
             feedback.save()
+            log_action(request.user, "Submit Feedback", f"Submitted feedback: {feedback.message}")
             messages.success(request, "Feedback submitted successfully.")
             return redirect('feedback_list')
         else:
@@ -696,6 +728,117 @@ def resolve_feedback(request, id):
     if request.method == 'POST':
         feedback.is_resolved = True
         feedback.save()
+        log_action(request.user, "Resolve Feedback", f"Resolved feedback from {feedback.user.username}")
         messages.success(request, "Feedback marked as resolved.")
         return redirect('feedback_list')
     return render(request, 'feedback_list.html', {'feedbacks': Feedback.objects.all()})
+# day24testcheck
+@login_required
+@user_passes_test(is_admin_or_doctor)
+def patient_profile(request, id):
+    patient = get_object_or_404(Patient, id=id)
+    appointments = Appointment.objects.filter(patient=patient)
+    diagnoses = Diagnosis.objects.filter(patient=patient)
+    lab_reports = LabReport.objects.filter(patient=patient)
+    return render(request, 'patient_profile.html', {
+        'patient': patient,
+        'appointments': appointments,
+        'diagnoses': diagnoses,
+        'lab_reports': lab_reports,
+    })
+
+@login_required
+@user_passes_test(is_admin_or_doctor)
+def generate_patient_report(request, id):
+    patient = get_object_or_404(Patient, id=id)
+    appointments = Appointment.objects.filter(patient=patient)
+    diagnoses = Diagnosis.objects.filter(patient=patient)
+    lab_reports = LabReport.objects.filter(patient=patient)
+
+    # Create a BytesIO buffer to receive PDF data
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Define starting position
+    y_position = height - 50
+    line_height = 14
+
+    # Title
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y_position, f"Patient Medical Report: {patient.first_name} {patient.last_name}")
+    y_position -= 30
+
+    # Patient Details
+    p.setFont("Helvetica", 12)
+    p.drawString(50, y_position, f"Patient ID: {patient.patient_id}")
+    y_position -= line_height
+    p.drawString(50, y_position, f"Gender: {patient.get_gender_display()}")
+    y_position -= line_height
+    p.drawString(50, y_position, f"Date of Birth: {patient.date_of_birth}")
+    y_position -= line_height
+    p.drawString(50, y_position, f"Blood Group: {patient.blood_group}")
+    y_position -= 30
+
+    # Appointments
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y_position, "Appointments")
+    y_position -= line_height
+    p.setFont("Helvetica", 12)
+    for appointment in appointments:
+        if y_position < 50:
+            p.showPage()
+            y_position = height - 50
+        p.drawString(50, y_position, f"Date: {appointment.appointment_date} | Doctor: {appointment.doctor}")
+        y_position -= line_height
+        # p.drawString(50, y_position, f"Notes: {appointment.notes or 'None'}")
+        # y_position -= line_height * 2
+
+    # Diagnoses
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y_position, "Diagnoses")
+    y_position -= line_height
+    p.setFont("Helvetica", 12)
+    for diagnosis in diagnoses:
+        if y_position < 50:
+            p.showPage()
+            y_position = height - 50
+        p.drawString(50, y_position, f"Date: {diagnosis.diagnosis_date} | Disease: {diagnosis.disease}")
+        y_position -= line_height * 2
+
+    # Lab Reports
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y_position, "Lab Reports")
+    y_position -= line_height
+    p.setFont("Helvetica", 12)
+    for lab_report in lab_reports:
+        if y_position < 50:
+            p.showPage()
+            y_position = height - 50
+        p.drawString(50, y_position, f"Test: {lab_report.test_name} | Date: {lab_report.date}")
+        y_position -= line_height
+        p.drawString(50, y_position, f"Status: {lab_report.get_status_display()}")
+        y_position -= line_height
+        p.drawString(50, y_position, f"Results: {lab_report.results or 'None'}")
+        y_position -= line_height * 2
+
+    # Finalize PDF
+    p.showPage()
+    p.save()
+
+    # Get the PDF data from the buffer
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    # Create HTTP response with PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="patient_report_{patient.patient_id}.pdf"'
+    response.write(pdf)
+    log_action(request.user, "Generate Patient Report", f"Generated PDF report for patient {patient.first_name} {patient.last_name} (ID: {patient.patient_id})")
+    return response
+
+@login_required
+@user_passes_test(is_admin)
+def audit_log_list(request):
+    audit_logs = AuditLog.objects.all().order_by('-timestamp')
+    return render(request, 'audit_log_list.html', {'audit_logs': audit_logs})

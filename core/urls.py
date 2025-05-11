@@ -32,5 +32,8 @@ urlpatterns = [
     path('feedback/', views.feedback_list, name='feedback_list'),
     path('feedback/submit/', views.submit_feedback, name='submit_feedback'),
     path('feedback/resolve/<int:id>/', views.resolve_feedback, name='resolve_feedback'),
+    path('patients/<int:id>/report/', views.generate_patient_report, name='generate_patient_report'),
+    path('audit-logs/', views.audit_log_list, name='audit_log_list'),
+
 ]
 

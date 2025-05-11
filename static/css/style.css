@@ -71,6 +71,14 @@
     gap: 10px;
 }
 
+.top-links .btn {
+  margin-left: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
   .sidebar-toggle {
     display: none;
@@ -311,7 +319,9 @@
     list-style: none;
     padding: 0;
   }
-  
+  .fa-eye{
+    background: #000;
+  }
   /* Filter Form */
   .filter-form {
     margin: 20px 0;
@@ -584,14 +594,21 @@
 }
 
 /* CONTENT WRAPPER */
-/* .content-wrapper {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 30px;
-    background-color: #fff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-} */
+.content-wrapper {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  font-family: 'Segoe UI', sans-serif;
+}
+.table-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
 
 label {
     display: block;
@@ -676,4 +693,8 @@ label {
     .medicine-table thead {
         display: none;
     }
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9f9f9;
 }

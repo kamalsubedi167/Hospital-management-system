@@ -26,6 +26,7 @@
                     {% if user.groups.all.0.name == 'Admin' %}
                         <a href="{% url 'medicine_list' %}" class="sidebar-link">Pharmacy</a>
                         <a href="{% url 'billing_list' %}" class="sidebar-link">Billing</a>
+                        <a href="{% url 'audit_log_list' %}" class="sidebar-link">Audit Logs</a>
                     {% endif %}
                     <a href="{% url 'lab_report_list' %}" class="sidebar-link">Lab Reports</a>
                     <a href="{% url 'feedback_list' %}" class="sidebar-link">Feedback</a>

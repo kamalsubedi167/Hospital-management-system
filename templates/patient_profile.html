@@ -12,6 +12,9 @@
                 {% endfor %}
             </div>
         {% endif %}
+        <div>
+            <a href="{% url 'generate_patient_report' patient.id %}" class="btn btn-success"><i class="fas fa-file-pdf"></i> Generate PDF Report</a>
+        </div>
 
         <div class="dashboard-section">
             <h3 class="section-title">Personal Information</h3>

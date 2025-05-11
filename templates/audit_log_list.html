@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Logs{% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <h2 class="table-title">Audit Logs</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Description</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                    <tr>
+                        <td>{{ log.user.username|escape }}</td>
+                        <td>{{ log.action|escape }}</td>
+                        <td>{{ log.description|escape }}</td>
+                        <td>{{ log.timestamp|escape }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No audit logs available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
